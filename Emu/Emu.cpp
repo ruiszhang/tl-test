@@ -156,11 +156,12 @@ struct Transaction
     int channel;
     int opcode;
     paddr_t address;
+    int pc;
     int param;
 
     Transaction(){}
-    Transaction(uint64_t timestamp, int sender, int channel, int opcode, paddr_t address, int param):
-        timestamp(timestamp), sender(sender), channel(channel), opcode(opcode), address(address), param(param) {}
+    Transaction(uint64_t timestamp, int sender, int channel, int opcode, paddr_t address, int pc, int param):
+        timestamp(timestamp), sender(sender), channel(channel), opcode(opcode), address(address), pc(pc), param(param) {}
 
     void parseManual(std::string line) {
         std::stringstream ss(line);
@@ -170,7 +171,7 @@ struct Transaction
         while (std::getline(ss, value, ',')) {
             values.push_back(value);
         }
-        // timestamp, which L1, channel, opcode, tag, set, param
+        // timestamp, which L1, channel, opcode, param, tag, set, bank, pc
         this->timestamp = std::stoull(values[1]);
         this->sender = std::stoi(values[2]);
         this->channel = std::stoi(values[3]);
@@ -179,6 +180,7 @@ struct Transaction
         unsigned tag = std::stoul(values[6]);
         unsigned set = std::stoul(values[7]);
         unsigned bank = std::stoul(values[8]);
+        this-> pc   = std::stoul(values[9]);
         this->address = fullAddr(tag, set, bank);
 
     }
@@ -229,7 +231,7 @@ void Emu::execute(uint64_t nr_cycle) {
             if (Cycles == nextTrans) {
                 printf("======= %s\n", line.c_str());
                 printf("Cycles: %ld\n", Cycles + 1000); //consider time spent on initialization
-                int code = fuzzers[t.sender]->transaction(t.channel, t.opcode, t.address, t.param);
+                int code = fuzzers[t.sender]->transaction(t.channel, t.opcode, t.address, t.pc, t.param);
                 if(code == 0 || code == 30 || code == 80) {
                     if(code == 0) count_exe++;
                     if(code == 30 || code == 80) {
@@ -301,6 +303,7 @@ tl_agent::Port<tl_agent::ReqField, tl_agent::RespField, tl_agent::EchoField, BEA
     port->a.mask = &(dut_ptr->master_port_0_0_a_bits_mask);
     port->a.data = (uint8_t*)&(dut_ptr->master_port_0_0_a_bits_data);
     port->a.alias = (uint8_t*)&(dut_ptr->master_port_0_0_a_bits_user_alias);
+    port->a.pc = (uint8_t*)&(dut_ptr->master_port_0_0_a_bits_user_pc);
 
     port->b.ready = &(dut_ptr->master_port_0_0_b_ready);
     port->b.valid = &(dut_ptr->master_port_0_0_b_valid);

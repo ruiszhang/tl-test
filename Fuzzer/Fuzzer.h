@@ -50,7 +50,7 @@ public:
     void randomTest(bool do_alias);
     void caseTest();
     // void traceTest(std::string line);
-    int transaction(int channel, int opcode, paddr_t address, int param);
+    int transaction(int channel, int opcode, paddr_t address, int pc, int param);
     // void tick(bool mode, std::string line);
     void tick();
 };

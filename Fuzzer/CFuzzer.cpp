@@ -66,14 +66,14 @@ void CFuzzer::randomTest(bool do_alias) {
         if (rand() % 3) {
             if (rand() % 2) {
                 // printf("AcquireBlock NtoT, addr = %016x\n", addr);  
-                cAgent->do_acquireBlock(addr, tl_agent::NtoT, alias); // AcquireBlock NtoT
+                cAgent->do_acquireBlock(addr, tl_agent::NtoT, alias, 0); // AcquireBlock NtoT
             } else {
                 // printf("AcquireBlock NtoB, addr = %016x\n", addr);  
-                cAgent->do_acquireBlock(addr, tl_agent::NtoB, alias); // AcquireBlock NtoB
+                cAgent->do_acquireBlock(addr, tl_agent::NtoB, alias, 0); // AcquireBlock NtoB
             }
         } else {
             // printf("AcquirePerm NtoT, addr = %016x\n", addr);  
-            cAgent->do_acquirePerm(addr, tl_agent::NtoT, alias); // AcquirePerm
+            cAgent->do_acquirePerm(addr, tl_agent::NtoT, alias, 0); // AcquirePerm
         }
     } else {
         /*
@@ -90,7 +90,7 @@ void CFuzzer::randomTest(bool do_alias) {
 
 void CFuzzer::caseTest() {
     if (*cycles == 100) {
-        this->cAgent->do_acquireBlock(0x1040, tl_agent::NtoT, 0);
+        this->cAgent->do_acquireBlock(0x1040, tl_agent::NtoT, 0, 0);
     }
     if (*cycles == 300) {
         uint8_t* putdata = new uint8_t[DATASIZE];
@@ -100,7 +100,7 @@ void CFuzzer::caseTest() {
         this->cAgent->do_releaseData(0x1040, tl_agent::TtoN, putdata, 0);
     }
     if (*cycles == 400) {
-      this->cAgent->do_acquireBlock(0x1040, tl_agent::NtoT, 0);
+      this->cAgent->do_acquireBlock(0x1040, tl_agent::NtoT, 0, 0);
     }
 }
 
@@ -119,15 +119,17 @@ void CFuzzer::caseTest() {
 // }
 
 // bool CFuzzer::transaction(int channel, int opcode, paddr_t address, int param) {
-int CFuzzer::transaction(int channel, int opcode, paddr_t address, int param) {
+int CFuzzer::transaction(int channel, int opcode, paddr_t address, int pc, int param) {
     switch (channel) {
         case 1:
             switch (opcode) {
+                case 5:
+                    return this->cAgent->do_hint(address, param, 0, pc);
                 case 6:
                     // printf("CFuzzer: Acquire: 0x%x %d %d %d\n", address, channel, opcode, param);
-                    return this->cAgent->do_acquireBlock(address, param, 0);
+                    return this->cAgent->do_acquireBlock(address, param, 0, pc);
                 case 7:
-                    return this->cAgent->do_acquirePerm(address, param, 0);
+                    return this->cAgent->do_acquirePerm(address, param, 0, pc);
                 default:
                     return false;
             }

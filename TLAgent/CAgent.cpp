@@ -78,6 +78,10 @@ namespace tl_agent {
                 }
                 break;
             }
+            case Hint: {
+                // do not update localBoard
+                break;
+            }
             default:
                 tlc_assert(false, "Unknown opcode for channel A!");
         }
@@ -88,6 +92,7 @@ namespace tl_agent {
         *this->port->a.mask = *a->mask;
         *this->port->a.source = *a->source;
         *this->port->a.alias = *a->alias;
+        *this->port->a.pc = *a->pc;
         *this->port->a.valid = true;
         return OK;
     }
@@ -280,7 +285,7 @@ namespace tl_agent {
             *chnA.valid = false;
             tlc_assert(pendingA.is_pending(), "No pending A but A fired!");
             pendingA.update();
-            if (!pendingA.is_pending()) { // req A finished
+            if (!pendingA.is_pending() && (*chnA.opcode != 5)) { // req A finished
                 this->localBoard->query(*pendingA.info->address)->update_status(S_A_WAITING_D, *cycles, *pendingA.info->alias);
             }
         }
@@ -501,7 +506,7 @@ namespace tl_agent {
         probeIDpool.update();
     }
 
-    int CAgent::do_acquireBlock(paddr_t address, int param, int alias) {
+    int CAgent::do_acquireBlock(paddr_t address, int param, int alias, int pc) {
         if (pendingA.is_pending() || pendingB.is_pending() || idpool.full())
             return 10; // record failing condition
         if (localBoard->haskey(address)) { // check whether this transaction is legal
@@ -526,6 +531,7 @@ namespace tl_agent {
         req_a->mask = new uint32_t(0xffffffffUL);
         req_a->source = new uint8_t(this->idpool.getid());
         req_a->alias = new uint8_t(alias);
+        req_a->pc = new uint8_t(pc);
         // Log("== id == acquire %d\n", *req_a->source);
         pendingA.init(req_a, 1);
         switch (param) {
@@ -540,7 +546,48 @@ namespace tl_agent {
         return 0;
     }
 
-    int CAgent::do_acquirePerm(paddr_t address, int param, int alias) {
+    int CAgent::do_hint(paddr_t address, int param, int alias, int pc) {
+        if (pendingA.is_pending() || pendingB.is_pending() || idpool.full())
+            return 10; // record failing condition
+        if (localBoard->haskey(address)) { // check whether this transaction is legal
+            auto entry = localBoard->query(address);
+            auto privilege = entry->privilege[alias];
+            auto status = entry->status[alias];
+            if (status != S_VALID && status != S_INVALID) {
+                return 20;
+            }
+            if (status == S_VALID) {
+                // if (privilege == TIP) return 30;
+                // if (privilege == BRANCH && param != BtoT) { param = BtoT; }
+                if (privilege == BRANCH && param != BtoT) return 40;
+                if (privilege == INVALID && param == BtoT) return 50;
+            }
+        }
+        std::shared_ptr<ChnA<ReqField, EchoField, DATASIZE>> req_a(new ChnA<ReqField, EchoField, DATASIZE>());
+        req_a->opcode = new uint8_t(AcquireBlock);
+        req_a->address = new paddr_t(address);
+        req_a->param = new uint8_t(param);
+        req_a->size = new uint8_t(ceil(log2((double)DATASIZE)));
+        req_a->mask = new uint32_t(0xffffffffUL);
+        req_a->source = new uint8_t(this->idpool.getid());
+        req_a->alias = new uint8_t(alias);
+        req_a->pc = new uint8_t(pc);
+        // Log("== id == acquire %d\n", *req_a->source);
+        pendingA.init(req_a, 1);
+        switch (param) {
+        case NtoB:
+            Log("[%ld] [AcquireData NtoB] addr: %x alias: %d\n", *cycles, address, alias);
+            break;
+        case NtoT:
+            Log("[%ld] [AcquireData NtoT] addr: %x alias: %d\n", *cycles, address, alias);
+            break;
+        }
+
+        return 0;
+    }
+
+
+    int CAgent::do_acquirePerm(paddr_t address, int param, int alias, int pc) {
         if (pendingA.is_pending() || pendingB.is_pending() || idpool.full())
             return 10;
         if (localBoard->haskey(address)) {
@@ -564,6 +611,7 @@ namespace tl_agent {
         req_a->mask = new uint32_t(0xffffffffUL);
         req_a->source = new uint8_t(this->idpool.getid());
         req_a->alias = new uint8_t(alias);
+        req_a->pc = new uint8_t(pc);
         // Log("== id == acquire %d\n", *req_a->source);
         pendingA.init(req_a, 1);
         Log("[%ld] [AcquirePerm] addr: %x alias: %d\n", *cycles, address, alias);

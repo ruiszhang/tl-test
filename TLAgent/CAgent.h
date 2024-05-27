@@ -89,8 +89,9 @@ namespace tl_agent {
         void handle_channel();
         void update_signal();
 
-        int do_acquireBlock(paddr_t address, int param, int alias);
-        int do_acquirePerm(paddr_t address, int param, int alias);
+        int do_acquireBlock(paddr_t address, int param, int alias, int pc);
+        int do_acquirePerm(paddr_t address, int param, int alias, int pc);
+        int do_hint(paddr_t address, int param, int alias, int pc);
         int do_releaseData(paddr_t address, int param, uint8_t data[], int alias);
         int do_releaseDataAuto(paddr_t address, int alias);
     };
