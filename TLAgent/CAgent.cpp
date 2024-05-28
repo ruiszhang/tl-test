@@ -564,7 +564,7 @@ namespace tl_agent {
             }
         }
         std::shared_ptr<ChnA<ReqField, EchoField, DATASIZE>> req_a(new ChnA<ReqField, EchoField, DATASIZE>());
-        req_a->opcode = new uint8_t(AcquireBlock);
+        req_a->opcode = new uint8_t(Hint);
         req_a->address = new paddr_t(address);
         req_a->param = new uint8_t(param);
         req_a->size = new uint8_t(ceil(log2((double)DATASIZE)));

@@ -23,7 +23,7 @@ public:
     ~Fuzzer() = default;
     // virtual void tick(bool mode, std::string line) = 0;
     virtual void tick() = 0;
-    virtual int transaction(int channel, int opcode, paddr_t address, int param) = 0;
+    virtual int transaction(int channel, int opcode, paddr_t address, int pc, int param) = 0;
     void set_cycles(uint64_t *cycles) {
         this->cycles = cycles;
     }
@@ -37,7 +37,7 @@ public:
     void randomTest(bool put);
     void caseTest();
     void caseTest2();
-    int transaction(int channel, int opcode, paddr_t address, int param);
+    int transaction(int channel, int opcode, paddr_t address, int pc, int param);
     // void tick(bool mode, std::string line);
     void tick();
 };

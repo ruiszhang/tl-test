@@ -53,7 +53,7 @@ void ULFuzzer::caseTest2() {
 }
 
 // bool ULFuzzer::transaction(int channel, int opcode, paddr_t address, int param) {
-int ULFuzzer::transaction(int channel, int opcode, paddr_t address, int param) {
+int ULFuzzer::transaction(int channel, int opcode, paddr_t address, int pc, int param) {
   printf("ULFuzzer TODO\n");
   assert(0);
 }

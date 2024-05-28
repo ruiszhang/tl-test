@@ -180,7 +180,7 @@ struct Transaction
         unsigned tag = std::stoul(values[6]);
         unsigned set = std::stoul(values[7]);
         unsigned bank = std::stoul(values[8]);
-        this-> pc   = std::stoul(values[9]);
+        this-> pc   = std::stoi(values[9]);
         this->address = fullAddr(tag, set, bank);
 
     }
@@ -329,14 +329,14 @@ tl_agent::Port<tl_agent::ReqField, tl_agent::RespField, tl_agent::EchoField, BEA
     port->d.opcode = &(dut_ptr->master_port_0_0_d_bits_opcode);
     port->d.param = &(dut_ptr->master_port_0_0_d_bits_param);
     port->d.size = &(dut_ptr->master_port_0_0_d_bits_size);
-    port->d.sink = &(dut_ptr->master_port_0_0_d_bits_sink);
+    port->d.sink = (uint16_t *)&(dut_ptr->master_port_0_0_d_bits_sink);
     port->d.source = &(dut_ptr->master_port_0_0_d_bits_source);
     port->d.data = (uint8_t*)&(dut_ptr->master_port_0_0_d_bits_data);
     // port->d.dirty = &(dut_ptr->master_port_0_0_d_bits_echo_blockisdirty);
 
     port->e.ready = &(dut_ptr->master_port_0_0_e_ready);
     port->e.valid = &(dut_ptr->master_port_0_0_e_valid);
-    port->e.sink = &(dut_ptr->master_port_0_0_e_bits_sink);
+    port->e.sink = (uint16_t *)&(dut_ptr->master_port_0_0_e_bits_sink);
     return port;
 }
 
