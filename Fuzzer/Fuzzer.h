@@ -45,7 +45,7 @@ private:
     tl_agent::CAgent *cAgent;
 public:
     CFuzzer(tl_agent::CAgent *cAgent);
-    void randomTest(bool do_alias);
+    void randomTest(bool do_alias, bool has_reqsource, bool has_pc);
     void caseTest();
     void traceTest();
     void tick();

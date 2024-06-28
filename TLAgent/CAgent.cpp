@@ -88,6 +88,8 @@ namespace tl_agent {
         *this->port->a.mask = *a->mask;
         *this->port->a.source = *a->source;
         *this->port->a.alias = *a->alias;
+        *this->port->a.reqsource = *a->reqsource;
+        *this->port->a.pc = *a->pc;
         *this->port->a.valid = true;
         return OK;
     }
@@ -506,7 +508,7 @@ namespace tl_agent {
         probeIDpool.update();
     }
 
-    TransResp CAgent::do_acquireBlock(paddr_t address, int param, int alias) {
+    TransResp CAgent::do_acquireBlock(paddr_t address, int param, int alias, uint8_t reqsource, uint32_t pc) {
         if (pendingA.is_pending() || pendingB.is_pending() || idpool.full())
             return PENDING;
         if (localBoard->haskey(address)) { // check whether this transaction is legal
@@ -541,6 +543,8 @@ namespace tl_agent {
         req_a->mask = new uint32_t(0xffffffffUL);
         req_a->source = new uint8_t(this->idpool.getid());
         req_a->alias = new uint8_t(alias);
+        req_a->reqsource = new uint8_t(reqsource);
+        req_a->pc = new uint32_t(pc);
         // Log("== id == acquire %d\n", *req_a->source);
         pendingA.init(req_a, 1);
         switch (param) {
@@ -555,7 +559,7 @@ namespace tl_agent {
         return SUCCESS;
     }
 
-    TransResp CAgent::do_acquirePerm(paddr_t address, int param, int alias) {
+    TransResp CAgent::do_acquirePerm(paddr_t address, int param, int alias, uint8_t reqsource, uint32_t pc) {
         if (pendingA.is_pending() || pendingB.is_pending() || idpool.full())
             return PENDING;
         if (localBoard->haskey(address)) {
@@ -589,6 +593,8 @@ namespace tl_agent {
         req_a->mask = new uint32_t(0xffffffffUL);
         req_a->source = new uint8_t(this->idpool.getid());
         req_a->alias = new uint8_t(alias);
+        req_a->reqsource = new uint8_t(reqsource);
+        req_a->pc = new uint32_t(pc);
         // Log("== id == acquire %d\n", *req_a->source);
         pendingA.init(req_a, 1);
         Log("[%ld] [AcquirePerm] addr: %x alias: %d\n", *cycles, address, alias);

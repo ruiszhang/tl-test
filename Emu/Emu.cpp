@@ -45,7 +45,7 @@ void Emu::parse_args(int argc, char **argv) {
             case 't':
                 this->enable_trace = true;
                 this->trace_file = std::ifstream(optarg);
-                printf("Trace format: 'timestamp, which L1, channel, opcode, address, param'\n");
+                printf("Trace format: 'timestamp, which L1, channel, opcode, address, param, reqsource, pc'\n");
                 break;
             default:
                 tlc_assert(false, "Unknown args!");
@@ -260,6 +260,8 @@ tl_agent::Port<tl_agent::ReqField, tl_agent::RespField, tl_agent::EchoField, BEA
     port->a.mask = &(dut_ptr->master_port_0_0_a_bits_mask);
     port->a.data = (uint8_t*)&(dut_ptr->master_port_0_0_a_bits_data);
     port->a.alias = (uint8_t*)&(dut_ptr->master_port_0_0_a_bits_user_alias);
+    port->a.reqsource = (uint8_t*)&(dut_ptr->master_port_0_0_a_bits_user_reqSource);
+    port->a.pc = (uint32_t*)&(dut_ptr->master_port_0_0_a_bits_user_pc);
 
     port->b.ready = &(dut_ptr->master_port_0_0_b_ready);
     port->b.valid = &(dut_ptr->master_port_0_0_b_valid);

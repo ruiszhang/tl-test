@@ -90,8 +90,8 @@ namespace tl_agent {
         void handle_channel();
         void update_signal();
 
-        TransResp do_acquireBlock(paddr_t address, int param, int alias);
-        TransResp do_acquirePerm(paddr_t address, int param, int alias);
+        TransResp do_acquireBlock(paddr_t address, int param, int alias, uint8_t reqsource, uint32_t pc);
+        TransResp do_acquirePerm(paddr_t address, int param, int alias, uint8_t reqsource, uint32_t pc);
         TransResp do_releaseData(paddr_t address, int param, uint8_t data[], int alias);
         TransResp do_releaseDataAuto(paddr_t address, int alias);
     };

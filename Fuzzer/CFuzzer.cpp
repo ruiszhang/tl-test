@@ -8,18 +8,21 @@ CFuzzer::CFuzzer(tl_agent::CAgent *cAgent) {
     this->cAgent = cAgent;
 }
 
-void CFuzzer::randomTest(bool do_alias) {
+void CFuzzer::randomTest(bool do_alias, bool has_reqsource, bool has_pc) {
     paddr_t addr = ((rand() % 0x8) << 13) + ((rand() % 0x80) << 6);  // Tag + Set + Offset
     int alias = (do_alias) ? (rand() % 4) : 0;
+    uint8_t reqsource = (has_reqsource) ? (rand() % 8) : 0;
+    uint32_t pc = (has_pc) ? (rand() % 0x400) : 0;
+
     if (rand() % 2) {
         if (rand() % 3) {
             if (rand() % 2) {
-                cAgent->do_acquireBlock(addr, tl_agent::NtoT, alias); // AcquireBlock NtoT
+                cAgent->do_acquireBlock(addr, tl_agent::NtoT, alias, reqsource, pc); // AcquireBlock NtoT
             } else {
-                cAgent->do_acquireBlock(addr, tl_agent::NtoB, alias); // AcquireBlock NtoB
+                cAgent->do_acquireBlock(addr, tl_agent::NtoB, alias, reqsource, pc); // AcquireBlock NtoB
             }
         } else {
-            cAgent->do_acquirePerm(addr, tl_agent::NtoT, alias); // AcquirePerm
+            cAgent->do_acquirePerm(addr, tl_agent::NtoT, alias, reqsource, pc); // AcquirePerm
         }
     } else {
         /*
@@ -34,19 +37,19 @@ void CFuzzer::randomTest(bool do_alias) {
 }
 
 void CFuzzer::caseTest() {
-    if (*cycles == 100) {
-        this->cAgent->do_acquireBlock(0x1040, tl_agent::NtoT, 0);
-    }
-    if (*cycles == 300) {
-        uint8_t* putdata = new uint8_t[DATASIZE];
-        for (int i = 0; i < DATASIZE; i++) {
-            putdata[i] = (uint8_t)rand();
-        }
-        this->cAgent->do_releaseData(0x1040, tl_agent::TtoN, putdata, 0);
-    }
-    if (*cycles == 400) {
-      this->cAgent->do_acquireBlock(0x1040, tl_agent::NtoT, 0);
-    }
+    // if (*cycles == 100) {
+    //     this->cAgent->do_acquireBlock(0x1040, tl_agent::NtoT, 0);
+    // }
+    // if (*cycles == 300) {
+    //     uint8_t* putdata = new uint8_t[DATASIZE];
+    //     for (int i = 0; i < DATASIZE; i++) {
+    //         putdata[i] = (uint8_t)rand();
+    //     }
+    //     this->cAgent->do_releaseData(0x1040, tl_agent::TtoN, putdata, 0);
+    // }
+    // if (*cycles == 400) {
+    //   this->cAgent->do_acquireBlock(0x1040, tl_agent::NtoT, 0);
+    // }
 }
 
 inline uint16_t connect(uint8_t a, uint8_t b) {
@@ -62,14 +65,16 @@ void CFuzzer::traceTest() {
     uint8_t channel = t.channel;
     uint8_t opcode = t.opcode;
     uint8_t param = t.param;
+    uint8_t reqsource = t.reqsource;
+    uint32_t pc = t.pc;
     int send_status;
 
     switch (connect(channel, opcode))
     {
     case (1 << 8) | tl_agent::AcquireBlock:
-        send_status = this->cAgent->do_acquireBlock(addr, param, 0);    break;
+        send_status = this->cAgent->do_acquireBlock(addr, param, 0, reqsource, pc);    break;
     case (1 << 8) | tl_agent::AcquirePerm:
-        send_status = this->cAgent->do_acquirePerm(addr, param, 0);     break;
+        send_status = this->cAgent->do_acquirePerm(addr, param, 0, reqsource, pc);     break;
     // even if transaction has param, we still use releaseDataAuto here
     // in fear of releaseData may have unknown bugs untested
     case (4 << 8) | tl_agent::ReleaseData:
@@ -90,6 +95,6 @@ void CFuzzer::traceTest() {
 }
 
 void CFuzzer::tick() {
-    this->randomTest(true);
+    this->randomTest(true, true, true);
 //    this->caseTest();
 }
