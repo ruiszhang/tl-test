@@ -42,7 +42,7 @@ private:
 public:
     Emu(int argc, char **argv);
     ~Emu();
-    uint64_t exe_cycles = 10000000;
+    uint64_t exe_cycles = 100000000;
     inline void reset(uint64_t n);
     inline void neg_edge();
     inline void pos_edge();

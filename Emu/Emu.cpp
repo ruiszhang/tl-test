@@ -142,6 +142,7 @@ void Emu::execute(uint64_t nr_cycle) {
     bool transactions_end = false; // all transactions in queues have been sent
     int end_timer = END_TIMER;
     int trans_count = 0;
+    int tag_cnt = 0;
     while (Cycles < nr_cycle) {
         if (enable_trace) {
             // ====== Read Transactions from Tracefile ======
@@ -218,11 +219,17 @@ void Emu::execute(uint64_t nr_cycle) {
             agents[i]->handle_channel();
         }
 
+        
         for (int i = 0; i < NR_AGENTS; i++) {
             if (enable_trace) fuzzers[i]->traceTest();
-            else fuzzers[i]->tick(); // random-test
+            else fuzzers[i]->tick(tag_cnt); // random-test
         }
-
+        if(tag_cnt == 16){
+            tag_cnt = 0;
+        } 
+        else{
+            tag_cnt = tag_cnt + 1;
+        }
         for (int i = 0; i < NR_AGENTS; i++) {
             agents[i]->update_signal();
         }

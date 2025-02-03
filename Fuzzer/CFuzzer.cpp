@@ -8,14 +8,14 @@ CFuzzer::CFuzzer(tl_agent::CAgent *cAgent) {
     this->cAgent = cAgent;
 }
 
-void CFuzzer::randomTest(bool do_alias, bool has_reqsource, bool has_pc) {
+void CFuzzer::randomTest(bool do_alias, bool has_reqsource, bool has_pc, int tag_cnt) {
     // paddr_t addr = ((rand() % 0x8) << 13) + ((rand() % 0x1) << 6);  // Tag + Set + Offset
-    paddr_t addr = ((rand() % 0x20) << 13) + ((0x1) << 6);  // Tag + Set + Offset
+    paddr_t addr = (tag_cnt << 13) + ((0) << 6);  // Tag + Set + Offset
     int alias = (do_alias) ? (rand() % 4) : 0;
     uint8_t reqsource = (has_reqsource) ? (rand() % 4) : 0;
     // uint8_t reqsource = (has_reqsource) ? 1 : 0;
-    uint32_t pc = (has_pc) ? (rand() % 8) : 0;
-    // uint32_t pc = (has_pc) ? 3 : 0;
+    uint32_t pc = (has_pc) ? (rand() % 0x40) : 0;
+    // uint32_t pc = (has_pc) ? (tag_cnt % 8) : 0;
 
     if (rand() % 2) {
         if (rand() % 3) {
@@ -97,7 +97,7 @@ void CFuzzer::traceTest() {
     // otherwise try it next cycle
 }
 
-void CFuzzer::tick() {
-    this->randomTest(false, true, true);
+void CFuzzer::tick(int tag_cnt) {
+    this->randomTest(false, true, true, tag_cnt);
 //    this->caseTest();
 }

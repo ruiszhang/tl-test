@@ -53,7 +53,7 @@ void ULFuzzer::caseTest2() {
   }
 }
 
-void ULFuzzer::tick() {
+void ULFuzzer::tick(int tag_cnt) {
     this->randomTest(false);
 //    this->caseTest();
 }

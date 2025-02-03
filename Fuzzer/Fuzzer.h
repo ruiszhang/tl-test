@@ -15,7 +15,7 @@ protected:
 public:
     Fuzzer() = default;
     ~Fuzzer() = default;
-    virtual void tick() = 0;
+    virtual void tick(int tag_cnt) = 0;
     virtual void traceTest() = 0;
     void set_cycles(uint64_t *cycles) {
         this->cycles = cycles;
@@ -37,7 +37,7 @@ public:
     void caseTest();
     void caseTest2();
     void traceTest();
-    void tick();
+    void tick(int tag_cnt);
 };
 
 class CFuzzer: public Fuzzer {
@@ -45,10 +45,10 @@ private:
     tl_agent::CAgent *cAgent;
 public:
     CFuzzer(tl_agent::CAgent *cAgent);
-    void randomTest(bool do_alias, bool has_reqsource, bool has_pc);
+    void randomTest(bool do_alias, bool has_reqsource, bool has_pc, int tag_cnt);
     void caseTest();
     void traceTest();
-    void tick();
+    void tick(int tag_cnt);
 };
 
 #endif //TLC_TEST_FUZZER_H
